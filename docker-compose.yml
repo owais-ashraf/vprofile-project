@@ -1,0 +1,51 @@
+version: '3.8'
+services:
+  vprodb:
+    build:  
+      context: ./Docker-files/db
+    image: vprocontainers/vprofiledb  #This is the name of the image 
+    container_name: vprodb            #This is the name of the container
+    ports:
+      - "3306:3306"                   #This is the port that will be exposed
+    volumes:
+      - vprodbdata:/var/lib/mysql     #This is the name of the volume
+    environment: 
+      - MYSQL_ROOT_PASSWORD=sqlpass
+  
+  vprocache01:                        #This name is based on the file app.prop
+    image: memcached
+    ports:
+      - "11211:11211"
+  
+  vpromq01:
+    image: rabbitmq
+    ports:
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest   
+  
+  vproapp:
+    build:  
+      context: ./Docker-files/app
+    image: vprocontainers/vprofileapp  #This is the name of the image 
+    container_name: vproapp            #This is the name of the container
+    ports:
+      - "8080:8080"                   #This is the port that will be exposed
+    volumes:
+      - vproappdata:/usr/local/tomcat/webapps     #This is the name of the volume
+
+  vproweb:
+    build:  
+      context: ./Docker-files/web
+    image: vprocontainers/vprofileweb  #This is the name of the image 
+    container_name: vproweb            #This is the name of the container
+    ports:
+      - "5005:80"                        #This is the port that will be exposed
+    volumes:
+      - vproappdata:/usr/local/tomcat/webapps     
+    
+
+volumes:
+    vprodbdata: {}
+    vproappdata: {}
